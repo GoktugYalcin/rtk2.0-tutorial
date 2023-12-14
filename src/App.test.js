@@ -1,16 +1,42 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
-import { store } from './app/store';
+import { configureStore } from '@reduxjs/toolkit';
+import todosSlice, { addTodo } from './features/todos/todosSlice';
 import App from './App';
 
-test('renders learn react link', () => {
-  const { getByText } = render(
-    <Provider store={store}>
-      <App />
-    </Provider>
-  );
+describe('App', () => {
+  let store;
 
-    // eslint-disable-next-line testing-library/prefer-screen-queries
-  expect(getByText(/Selected/i)).toBeInTheDocument();
+  beforeEach(() => {
+    store = configureStore({ reducer: { todos: todosSlice } });
+  });
+
+  it('renders without crashing', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+    expect(getByText(/Selected Todo/i)).toBeInTheDocument();
+  });
+
+  it('renders todos from initial state', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+    expect(getByText(/todo found!/i)).toBeInTheDocument();
+  });
+
+  it('dispatches addTodo action on add todo button click', () => {
+    const { getByText } = render(
+      <Provider store={store}>
+        <App />
+      </Provider>
+    );
+    fireEvent.click(getByText(/Add Todo/i));
+    expect(store.getState().todos).toContainEqual({ id: 104, text: 'New todo', completed: false });
+  });
 });
